@@ -67,7 +67,8 @@ def mk_dicts():
         try:
           attr_dict = dict(part.strip().split(":", 1) for part in attr_str.split(";")
                            if part.strip())
-          requirements['equiv'] = [attr_value for attr_key, attr_value in attr_dict.items()                                             if attr_key.startswith('ME')]
+          requirements['equiv'] = [attr_value for attr_key, attr_value in attr_dict.items()
+                                   if attr_key.startswith('ME')]
         except ValueError:
           requirements['equiv'] = None
 
