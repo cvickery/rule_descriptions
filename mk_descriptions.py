@@ -28,7 +28,7 @@ def min_grade(min_gpa) -> str:
 def format_requirements(requirements: dict) -> str:
   """Generate a string description from a requirements dict."""
   if not requirements:
-    return ''
+    return '--:--:--:000'
   return (f'{requirements['pways'] if requirements['pways'] else '--'}'
           f':{'CO' if requirements['copt'] else '--'}'
           f':{'ME' if requirements['equiv'] else '--'}'
