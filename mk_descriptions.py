@@ -30,9 +30,9 @@ def format_requirements(requirements: dict) -> str:
   if not requirements:
     return ''
   return (f'{requirements['pways'] if requirements['pways'] else '--'}'
-          f'{'CO' if requirements['copt'] else '--'}'
-          f'{'ME' if requirements['equiv'] else '--'}'
-          f'{len(requirements['plans']):03}')
+          f':{'CO' if requirements['copt'] else '--'}'
+          f':{'ME' if requirements['equiv'] else '--'}'
+          f':{len(requirements['plans']):03}')
 
 
 # oxfordize()
@@ -60,7 +60,6 @@ if __name__ == "__main__":
     with conn.cursor(row_factory=namedtuple_row) as cursor:
 
       # Cache course info dicts
-      print('Generate courses cache')
       """ Info needed to display all three levels of detail, plus status and career for
         anomaly checking (they should 'A' and 'UGRD').
       """
@@ -86,7 +85,6 @@ if __name__ == "__main__":
                                                      'requirements': requirements}
 
       # Generate all descriptions
-      print('Generate Rule Descriptions')
       all_descriptions = []
       cursor.execute("""
       SELECT
@@ -211,8 +209,8 @@ if __name__ == "__main__":
         all_descriptions.append((rule_key, f'{oxfordize(src_list)} => {oxfordize(dst_list)}'))
 
       # Replace all rows in the rule_descriptions table
-      print(f'Generted {len(all_descriptions):,} rule_descriptions')
       cursor.execute('truncate rule_descriptions')
       with cursor.copy('copy rule_descriptions (rule_key, description) from stdin') as cpy:
         for row in all_descriptions:
           cpy.write_row(row)
+      print(f'Generted {len(all_descriptions):,} rule_descriptions')
