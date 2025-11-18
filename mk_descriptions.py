@@ -146,76 +146,80 @@ def describe_rule(row: namedtuple) -> tuple:
   source_courses = [(source_course['course_id'], source_course['offer_nbr'],
                     source_course['min_gpa'])
                     for source_course in row.source_courses]
-  try:
-    for course_id, offer_nbr, min_gpa in source_courses:
-      this_course = {'course_id': None,
-                     'offer_nbr': None,
-                     'course': '',
-                     'min_grade': 'P',
-                     'aliases': [],
-                     'requirements': dict
-                     }
-      src_infos = course_info[course_id]
-      for this_offer_nbr, src_info in src_infos.items():
-        if this_offer_nbr == offer_nbr:
-          # This _is_ this course: fill in the dict
-          this_course['course_id'] = course_id
-          this_course['offer_nbr'] = offer_nbr
-          this_course['course'] = src_info['course']
-          this_course['min_grade'] = min_grade(min_gpa)
-          this_course['requirements'] = format_requirements(src_info['requirements'])
-        else:
-          this_course['aliases'].append(src_info['course'])
 
-      if this_course['offer_nbr'] is None:
-        this_course['course'] = 'Not a course'
-        raise KeyError('offer_nbr not in src_infos')
+  for course_id, offer_nbr, min_gpa in source_courses:
+    this_course = {'course_id': None,
+                   'offer_nbr': None,
+                   'course': '',
+                   'min_grade': 'P',
+                   'aliases': [],
+                   'requirements': dict
+                   }
+    src_infos = course_info[course_id]
+    for this_offer_nbr, src_info in src_infos.items():
+      if this_offer_nbr == offer_nbr:
+        # This _is_ this course: fill in the dict
+        this_course['course_id'] = course_id
+        this_course['offer_nbr'] = offer_nbr
+        this_course['course'] = src_info['course']
+        this_course['min_grade'] = min_grade(min_gpa)
+        this_course['requirements'] = format_requirements(src_info['requirements'])
+      else:
+        this_course['aliases'].append(src_info['course'])
 
-      aliases = (f' (={','.join(this_course['aliases'])})' if this_course['aliases']
-                 else '')
-      src_list.append(f'{this_course['course']}{aliases} '
-                      f'{this_course['min_grade']} ' f'[{this_course['requirements']}]')
-  except KeyError as err:
-    print(f'src: {err} {row.rule_key:20} {course_id:06}:{offer_nbr} {min_gpa:6} '
-          f'{src_infos}', file=error_log)
+    if this_course['offer_nbr'] is None:
+      # No matching offer_nbr in src_infos → bogus rule
+      this_course['course'] = 'No course'
+      this_course['requirements'] = '[--:--:--:---]'
+      print(f'src: offer_nbr not in src_infos '
+            f'{row.rule_key:20} {course_id:06}:{offer_nbr} {min_gpa:6} {src_infos}',
+            file=error_log)
 
+    aliases = (f' (={','.join(this_course['aliases'])})'
+               if this_course['aliases'] else '')
+    src_list.append(f'{this_course['course']}{aliases} '
+                    f'{this_course['min_grade']} '
+                    f'[{this_course['requirements']}]'
+                    )
   # Gather the information for all destination courses
   destination_courses = [(destination_course['course_id'],
                           destination_course['offer_nbr'])
                          for destination_course in row.destination_courses]
-  try:
-    for course_id, offer_nbr in destination_courses:
-      this_course = {'course_id': None,
-                     'offer_nbr': None,
-                     'course': '',
-                     'mesg': False,
-                     'bkcr': False,
-                     'aliases': [],
-                     'requirements': dict
-                     }
-      dst_infos = course_info[course_id]
-      for this_offer_nbr, dst_info in dst_infos.items():
-        if this_offer_nbr == offer_nbr:
-          # This _is_ this course: fill in the dict
-          this_course['course_id'] = course_id
-          this_course['offer_nbr'] = offer_nbr
-          this_course['course'] = dst_info['course']
-          this_course['mesg'] = 'M' if dst_info['is_mesg'] else '-'
-          this_course['bkcr'] = 'B' if dst_info['is_bkcr'] else '-'
-          this_course['requirements'] = format_requirements(dst_info['requirements'])
-        else:
-          this_course['aliases'].append(dst_info['course'])
+  for course_id, offer_nbr in destination_courses:
+    this_course = {'course_id': None,
+                   'offer_nbr': None,
+                   'course': '',
+                   'mesg': False,
+                   'bkcr': False,
+                   'aliases': [],
+                   'requirements': dict
+                   }
+    dst_infos = course_info[course_id]
+    for this_offer_nbr, dst_info in dst_infos.items():
+      if this_offer_nbr == offer_nbr:
+        # This _is_ this course: fill in the dict
+        this_course['course_id'] = course_id
+        this_course['offer_nbr'] = offer_nbr
+        this_course['course'] = dst_info['course']
+        this_course['mesg'] = 'M' if dst_info['is_mesg'] else '-'
+        this_course['bkcr'] = 'B' if dst_info['is_bkcr'] else '-'
+        this_course['requirements'] = format_requirements(dst_info['requirements'])
+      else:
+        this_course['aliases'].append(dst_info['course'])
 
-      if this_course['offer_nbr'] is None:
-        this_course['course'] = 'Not a course'
-        raise KeyError('offer_nbr not in dst_infos')
-      aliases = (f' (={','.join(this_course['aliases'])})' if this_course['aliases']
-                 else '')
-      dst_list.append(f'{this_course['course']}{aliases} '
-                      f'{this_course['mesg']}{this_course['bkcr']} '
-                      f'[{this_course['requirements']}]')
-  except KeyError as err:
-    print(f'dst: {err} {row.rule_key:20} {course_id:06}:{offer_nbr} {dst_infos}', file=error_log)
+    if this_course['offer_nbr'] is None:
+      # No matching offer_nbr in dst_infos → bogus rule
+      this_course['course'] = 'No course'
+      this_course['requirements'] = ''
+      print(f'dst: offer_nbr not in src_infos '
+            f'{row.rule_key:20} {course_id:06}:{offer_nbr} {min_gpa:6} {src_infos}',
+            file=error_log)
+
+    aliases = (f' (={','.join(this_course['aliases'])})' if this_course['aliases']
+               else '')
+    dst_list.append(f'{this_course['course']}{aliases} '
+                    f'{this_course['mesg']}{this_course['bkcr']} '
+                    f'[{this_course['requirements']}]')
 
   return (row.rule_key, row.effective_date, f'{oxfordize(src_list)} => {oxfordize(dst_list)}')
 
