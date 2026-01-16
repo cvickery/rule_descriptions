@@ -1,4 +1,5 @@
 __pycache__
 .aliases
 .flake8
-description_errors.log
+.nova
+description_errors*

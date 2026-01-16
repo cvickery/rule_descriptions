@@ -1,5 +1,10 @@
 #! /usr/local/bin/python3
-"""Create and populate the rule_descriptions table."""
+"""Create and populate the rule_descriptions table for the public schema or an archived set of
+   transfer rules.
+
+  Descriptions are always based on the current cuny_courses table, so there will be inaccuracies
+  for archived versions of the transfer rules.
+"""
 
 import psycopg
 import mk_requirement_dicts
@@ -11,8 +16,7 @@ from psycopg.rows import namedtuple_row
 
 SC = namedtuple('SC', 'course_id offer_nbr min_gpa req_info')
 DC = namedtuple('DC', 'course_id offer_nbr is_pseudo req_info')
-
-error_log = open('./description_errors.log', 'w')
+error_log = None
 
 mk_requirement_dicts.mk_dicts()
 course_info = defaultdict(dict)
@@ -228,6 +232,9 @@ def describe_rule(row: namedtuple) -> tuple:
 # -------------------------------------------------------------------------------------------------
 def describe_rules(schema_name: str) -> list:
   """Describe all the rules in a schema."""
+  global error_log
+  error_log = open(f'./description_errors.{schema_name}.log', 'w')
+
   all_descriptions = []
   with psycopg.connect('dbname=cuny_curriculum') as conn:
     with conn.cursor(row_factory=namedtuple_row) as cursor:
