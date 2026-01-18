@@ -6,12 +6,12 @@ I keep generating rule description strings in various projects, in varying forma
   **&lt;source\_courses> => &lt;destination\_courses>**
 
   - Both &lt;source\_courses> and &lt;destination\_courses> are comma-separated *and* lists of _course\_items_
-  - Each _course\_item_ consists of four parts:
+  - Each _course\_item_ consists of three parts:
       1. The course discipline and catalog number followed by any aliases in parentheses
       2.  Sending/Receiving Flags:
           - For source courses, the minimum grade required (‘P’ means any passing grade)
           - For destination courses, some combination of the letters ‘M’ for Message courses and ‘B’ for blanket credit courses (```-``` if not)
-      3. A colon-separated list of codes that tell what requirements the course can satisfy:
+      3. A colon-separated list of codes in square brackets that tell what requirements the course can satisfy:
           - A two-letter Pathways area (EC, MQ, LP, WG, US, IS, CE, SW, or ```--``` for none)
           - CO for College Option or ```--``` for not
           - ME if this is a major-equivalency course or ```--``` for not
