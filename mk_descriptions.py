@@ -12,6 +12,7 @@ import sys
 
 from bisect import bisect
 from collections import defaultdict, namedtuple
+from datetime import date
 from psycopg.rows import namedtuple_row
 
 SC = namedtuple('SC', 'course_id offer_nbr min_gpa req_info')
@@ -340,5 +341,10 @@ if __name__ == "__main__":
                        f'(rule_key, effective_date, description) from stdin') as cpy:
         for row in all_descriptions:
           cpy.write_row(row)
+
+      if schema_name == 'public':
+        cursor.execute("""
+        update updates set update_date = %s where table_name = 'rule_descriptions'
+        """, (date.today(),))
 
   print(f'Generated {len(all_descriptions):,} rule_descriptions in schema {schema_name}')
